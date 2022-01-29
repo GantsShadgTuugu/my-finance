@@ -50,16 +50,16 @@ var financeController = (function(){
     return {
         addItem: function(type, desc, val){
             var item, id;
-
-            if(data.items[type].length === 0) id = 1;
-            else{
+            
+            if (data.items[type].length === 0) id = 1;
+            else {
                 id = data.items[type][data.items[type].length - 1].id + 1;
             }
 
-            if(type === "inc"){
-                item = new Income(id,desc, val);
-            }else{
-                item = new Expense(id,desc, val);
+            if (type === "inc") {
+                item = new Income(id, desc, val);
+            } else {
+                item = new Expense(id, desc, val);
             }
             data.items[type].push(item);
             return item;
@@ -75,6 +75,7 @@ var appController = (function(uiController, financeController){
     var ctrlAddItem = function(){
         // 1. Оруулах өгөгдлий дэлгэцнээс олж авна.
         var input =  uiController.getInput();
+        console.log(input);
         // 2. Олж авсан өгөгдлүүдээ санхүүтэй ажиллах контроллерт дамжуулж тэнд хадгална.
         financeController.addItem(input.type, input.description, input.value);
         // 3. Олж авсан өгөгдлүүдээ веб дээрээ тохирох хэсэгт нь гаргана.
