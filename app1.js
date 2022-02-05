@@ -15,7 +15,7 @@ var uiController = (function(){
             return{
                 type: document.querySelector(DOMstrings.inputType).value, //exp, inc
                 description: document.querySelector(DOMstrings.inputDescription).value,
-                value: document.querySelector(DOMstrings.inputValue).value
+                value: parseInt(document.querySelector(DOMstrings.inputValue).value) 
             };
         },
 
@@ -24,12 +24,14 @@ var uiController = (function(){
         },
 
         clearField: function(){
-            var fields = document.querySelectorAll(DOMstrings.inputDescription + ", " + DOMstrings.inputValue);
+            var fields = document.querySelectorAll(
+                DOMstrings.inputDescription + ", " + DOMstrings.inputValue
+            );
             // Convert list to arrey
             var fieldsArr = Array.prototype.slice.call(fields);
-            fieldsArr.foreach(function(el, index, array){
+            fieldsArr.forEach(function(el, index, array){
                 el.value = "";
-            })
+            });
             
             fieldsArr[0].focus();
             // for(var i = 0; i < fieldsArr.length; i++){
@@ -69,6 +71,13 @@ var financeController = (function(){
         this.description = description;
         this.value = value;
     };
+    var calculateTotal = function(type){
+        var sum = 0;
+        data.items[type].forEach(function(el){
+            sum = sum + el.value;
+        })
+        data.totals[type] = sum;
+    };
     var data = {
         items: {
           inc: [],
@@ -78,7 +87,10 @@ var financeController = (function(){
         totals:{
           inc: 0,
           exp: 0
-        }
+        },
+
+        tusuv: 0,
+        huvi: 0
     }
     return {
         addItem: function(type, desc, val){
@@ -99,6 +111,26 @@ var financeController = (function(){
         },
         seeData: function() {
             return data;
+        },
+
+        tusuvTootsooloh: function(){
+        // Нийт орлогийн нийлбэрийг тооцоолно
+            calculateTotal("inc");
+        // Нийт зарлагийн нийлбэрийг тооцоолно
+            calculateTotal("exp");
+        // Төсвийг тооцоолно
+            data.tusuv = data.totals.inc - data.totals.exp;
+        // Орлого, зарлагийн хувийг тооцоолно
+            data.huvi = Math.round((data.totals.exp / data.totals.inc) * 100);
+        },
+        
+        tusviigAvah: function(){
+            return {
+                tusuv: data.tusuv,
+                huvi: data.huvi,
+                totalInc: data.totals.inc,
+                totalExp: data.totals.exp
+            }
         }
     };
 })();
@@ -108,15 +140,21 @@ var appController = (function(uiController, financeController){
     var ctrlAddItem = function(){
         // 1. Оруулах өгөгдлий дэлгэцнээс олж авна.
         var input =  uiController.getInput();
-        console.log(input);
+        if(input.description !== "" && input.value !==""){
+
         // 2. Олж авсан өгөгдлүүдээ санхүүтэй ажиллах контроллерт дамжуулж тэнд хадгална.
-        var item = financeController.addItem(input.type, input.description, input.value);
+            var item = financeController.addItem(input.type, input.description, input.value);
         // 3. Олж авсан өгөгдлүүдээ веб дээрээ тохирох хэсэгт нь гаргана.
-        uiController.addList(item, input.type);
-        uiController.clearField();
+            uiController.addList(item, input.type);
+            uiController.clearField();
         // 4. Төсвийг тооцоолно.
-        
+            financeController.tusuvTootsooloh();
         // 5. Эцсийн үлдэгдэл тооцоог дэлгэцэнд гаргана.
+            var tusuv = financeController.tusviigAvah();
+
+            console.log(tusuv);
+        };
+        
     };
     
     var setupEventListeners = function(){
