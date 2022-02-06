@@ -11,7 +11,8 @@ var uiController = (function(){
         tusuvLabel: ".budget__value",
         incomeLabel: ".budget__income--value",
         expenseLabel: ".budget__expenses--value",
-        percentageLabel: ".budget__expenses--percentage"
+        percentageLabel: ".budget__expenses--percentage",
+        containerDiv: ".container"
     }
 
     return {
@@ -53,16 +54,11 @@ var uiController = (function(){
             
         },
 
-        deleteItem: function(type, id){
-            var ids = data.items[type].map(function(el){
-                return el.id;
-            });
-
-            var index = ids.indexOf(id);
-            if(index !== -1){
-                data.items[type].splice(index,1);
-            }
+        deleteListItem: function(id){
+            var el = document.getElementById(id);
+            el.parentNode.removeChild(el);
         },
+
         addList: function(item, type){
             // 1. Орлого зарлагийн алийг нь агуулсан html-ийг бэлтгэнэ
             var html, list;
@@ -156,7 +152,18 @@ var financeController = (function(){
                 totalInc: data.totals.inc,
                 totalExp: data.totals.exp
             }
-        }
+        },
+        
+        deleteItem: function(type, id){
+            var ids = data.items[type].map(function(el){
+                return el.id;
+            });
+
+            var index = ids.indexOf(id);
+            if(index !== -1){
+                data.items[type].splice(index,1);
+            };
+        },
     };
 })();
 // Програмын холбогч контроллер
@@ -195,7 +202,26 @@ var appController = (function(uiController, financeController){
             ctrlAddItem();
             }
         });
-    }
+
+        document.querySelector(DOM.containerDiv).addEventListener("click", function(event){
+            var id = event.target.parentNode.parentNode.parentNode.parentNode.id;
+            
+            if(id){
+                //inc-2
+            var arr = id.split("-");
+            var type = arr[0];
+            var itemId = parseInt(arr[1]);
+
+            console.log(type + ' ==> ' + itemId);
+            }
+            // 1.Санхүүгийн модулиас type, id ашиглаад устгана.
+            financeController.deleteItem(type, itemId);
+            // 2.Дэлгэц дээрээс энэ элементийг устгана.
+            uiController.deleteListItem(id);
+            // 3.Үлдэгдэл тооцоог шинэчлэж харуулна.
+            
+        });
+    };
 
     return{
         init: function(){
@@ -208,7 +234,7 @@ var appController = (function(uiController, financeController){
             });
             setupEventListeners();
         }
-    }
+    };
 
 })(uiController, financeController);
 
