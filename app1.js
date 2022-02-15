@@ -12,8 +12,38 @@ var uiController = (function(){
         incomeLabel: ".budget__income--value",
         expenseLabel: ".budget__expenses--value",
         percentageLabel: ".budget__expenses--percentage",
-        containerDiv: ".container"
-    }
+        containerDiv: ".container",
+        expensePercentageLabel: ".item__percentage",
+        dateLabel: ".budget__title--month"
+    };
+
+    var formatMoney = function(too, type){
+        too = "" + too;
+        // 1. Элемент бүрээр нь салгах, байрын солих, элементүүдийг нийлүүлэх,
+        var x = too.split("").reverse().join("");
+        var y = '';
+        var count = 1;
+
+        for(var i=0; i < x.length; i++)
+        {
+            y = y + x[i];
+
+            if( count%3 === 0 ) y = y + ",";
+            count ++;
+        }
+        var z = y.split("").reverse().join("");
+        if(z[0] === ",") z = z.substr(1, z.length - 1);
+
+        if(type === "inc") z = "+ " + z;
+        else z = "- " + z;
+        return z;
+    };
+
+    var nodeListForeach = function(list, callback){
+        for( var i = 0; i < list.length; i++){
+            callback(list[i], i);
+        }
+    };
 
     return {
         getInput: function(){
@@ -22,6 +52,21 @@ var uiController = (function(){
                 description: document.querySelector(DOMstrings.inputDescription).value,
                 value: parseInt(document.querySelector(DOMstrings.inputValue).value) 
             };
+        },
+
+        displayDate: function(){
+            var unuudur = new Date();
+            
+            document.querySelector(DOMstrings.dateLabel).textContent = unuudur.getFullYear() + " оны " + unuudur.getMonth() + " сарын";
+        },
+
+        displayPercentages: function(allPercentages){
+            // Зарлагийн Nodelist-ийг олох 
+            var elements = document.querySelectorAll(DOMstrings.expensePercentageLabel);
+            // Элемент болгоний хувьд зарлагийн хувийг массиваас авч шивж оруулах
+            nodeListForeach(elements, function(el,index){
+                el.textContent = allPercentages[index];
+            });
         },
 
         getDOMstrings: function(){
@@ -43,9 +88,12 @@ var uiController = (function(){
         },
         
         tusviigUzuuleh: function(tusuv){
-            document.querySelector(DOMstrings.tusuvLabel).textContent = tusuv.tusuv;
-            document.querySelector(DOMstrings.incomeLabel).textContent = tusuv.totalInc;
-            document.querySelector(DOMstrings.expenseLabel).textContent = tusuv.totalExp;
+            var type;
+            if(tusuv.tusuv > 0) type = "inc"
+            else type = "exp";
+            document.querySelector(DOMstrings.tusuvLabel).textContent = formatMoney(tusuv.tusuv, type);
+            document.querySelector(DOMstrings.incomeLabel).textContent = formatMoney(tusuv.totalInc, "inc");
+            document.querySelector(DOMstrings.expenseLabel).textContent = formatMoney(tusuv.totalExp, "exp");
             if(tusuv.huvi !== 0){
                 document.querySelector(DOMstrings.percentageLabel).textContent = tusuv.huvi + "%";
             }else{
@@ -72,7 +120,7 @@ var uiController = (function(){
             // 2. Тэр html дотроо орлого зарлагийн утгуудыг REPLACE ашиглаж өөрчилж өгнө
             html =  html.replace('%id%', item.id);
             html =  html.replace('$$DESCRIPTION$$', item.description);
-            html =  html.replace('$$VALUE$$', item.value);
+            html =  html.replace('$$VALUE$$', formatMoney(item.value,type));
             // 3. Бэлтгэсэн html ээ DOM руу хийж өгнө 
             document.querySelector(list).insertAdjacentHTML("beforeend", html);
         }
@@ -224,7 +272,7 @@ var appController = (function(uiController, financeController){
         // 8. Элеметүүдийн хувийг хүлээж авна.
         var allPercentages = financeController.getPercentages();
         // 9. Эдгээр хувийг дэлгэцэнд гаргана.
-        console.log(allPercentages);
+        uiController.displayPercentages(allPercentages);
     };
     
     var setupEventListeners = function(){
@@ -264,6 +312,7 @@ var appController = (function(uiController, financeController){
     return{
         init: function(){
             console.log("Application started");
+            uiController.displayDate();
             uiController.tusviigUzuuleh({
                 tusuv: 0,
                 huvi: 0,
