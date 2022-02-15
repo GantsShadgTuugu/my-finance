@@ -54,6 +54,16 @@ var uiController = (function(){
             };
         },
 
+        changeType: function(){
+            var fields = document.querySelectorAll(DOMstrings.inputType + ", " + DOMstrings.inputDescription + ", " + DOMstrings.inputValue);
+
+            nodeListForeach(fields, function(el){
+                el.classList.toggle("red-focus");
+            });
+
+            document.querySelector(DOMstrings.addBtn).classList.toggle("red");
+        },
+
         displayDate: function(){
             var unuudur = new Date();
             
@@ -288,6 +298,8 @@ var appController = (function(uiController, financeController){
             ctrlAddItem();
             }
         });
+
+        document.querySelector(DOM.inputType).addEventListener('change', uiController.changeType);
 
         document.querySelector(DOM.containerDiv).addEventListener("click", function(event){
             var id = event.target.parentNode.parentNode.parentNode.parentNode.id;
